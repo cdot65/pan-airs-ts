@@ -1,11 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "declaration": true,
-    "declarationMap": true,
-    "module": "ES2020", // or "ESNext"
-    "removeComments": false
-  },
-  "include": ["src"]
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts", "**/*test.ts"]
 }
