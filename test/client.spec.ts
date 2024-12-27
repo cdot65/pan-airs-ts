@@ -22,18 +22,19 @@ jest.mock('axios');
 const mockAxiosInstance = {
     interceptors: {
         response: {
-            // We'll define a custom mockImplementation to store the success/failure callbacks
-            use: jest.fn(),
+            use: jest.fn((successFn, errorFn) => {
+                interceptorSuccessFn = successFn;
+                interceptorErrorFn = errorFn;
+            }),
         },
     },
-    // We won't define post/get yet; we'll define them once we have the interceptor callbacks
     post: jest.fn(),
     get: jest.fn(),
 };
 
 // The actual interceptor callbacks that get set in the constructor
-let interceptorSuccessFn: (res: any) => any;
-let interceptorErrorFn: (err: any) => any;
+let interceptorSuccessFn: (response: AxiosResponse) => AxiosResponse;
+let interceptorErrorFn: (error: AxiosError<PanAirsApiErrorResponse>) => Promise<never>;
 
 describe('PanAirsTsClient', () => {
     let client: PanAirsTsClient;
@@ -128,7 +129,7 @@ describe('PanAirsTsClient', () => {
             };
 
             // 3) Confirm it ends up throwing PanAirsApiError
-            await expect(client.scanSyncRequest(requestBody)).rejects.toThrowError(
+            await expect(client.scanSyncRequest(requestBody)).rejects.toThrow(
                 PanAirsApiError
             );
             expect(mockAxiosInstance.post).toHaveBeenCalledWith(
@@ -149,8 +150,16 @@ describe('PanAirsTsClient', () => {
                 report_id: 'R-async',
             };
 
+            const mockResponse: AxiosResponse = {
+                data: mockResponseData,
+                status: 200,
+                statusText: 'OK',
+                headers: {},
+                config: {} as InternalAxiosRequestConfig
+            };
+
             mockAxiosInstance.post.mockImplementationOnce(async () => {
-                return interceptorSuccessFn({ data: mockResponseData });
+                return interceptorSuccessFn(mockResponse);
             });
 
             const requestBody: AsyncScanRequest = [
@@ -171,6 +180,7 @@ describe('PanAirsTsClient', () => {
             );
             expect(result).toEqual(mockResponseData);
         });
+
 
         it('should throw PanAirsApiError on error response', async () => {
             const mockError = new Error('Forbidden') as AxiosError<PanAirsApiErrorResponse>;
@@ -197,7 +207,7 @@ describe('PanAirsTsClient', () => {
                 },
             ];
 
-            await expect(client.scanAsyncRequest(requestBody)).rejects.toThrowError(
+            await expect(client.scanAsyncRequest(requestBody)).rejects.toThrow(
                 PanAirsApiError
             );
             expect(mockAxiosInstance.post).toHaveBeenCalledWith(
@@ -212,14 +222,14 @@ describe('PanAirsTsClient', () => {
      * ------------------------------------------------------------------ */
     describe('getScanResultsByScanIds', () => {
         it('should throw error if no scanIds are provided', async () => {
-            await expect(client.getScanResultsByScanIds([])).rejects.toThrowError(
+            await expect(client.getScanResultsByScanIds([])).rejects.toThrow(
                 'At least 1 scan_id is required'
             );
         });
 
         it('should throw error if more than 5 scanIds are provided', async () => {
             const tooManyIds = ['1', '2', '3', '4', '5', '6'];
-            await expect(client.getScanResultsByScanIds(tooManyIds)).rejects.toThrowError(
+            await expect(client.getScanResultsByScanIds(tooManyIds)).rejects.toThrow(
                 'Max of 5 scan_ids can be requested at a time'
             );
         });
@@ -238,8 +248,16 @@ describe('PanAirsTsClient', () => {
                 },
             ];
 
+            const mockResponse: AxiosResponse = {
+                data: mockData,
+                status: 200,
+                statusText: 'OK',
+                headers: {},
+                config: {} as InternalAxiosRequestConfig
+            };
+
             mockAxiosInstance.get.mockImplementationOnce(async () => {
-                return interceptorSuccessFn({ data: mockData });
+                return interceptorSuccessFn(mockResponse);
             });
 
             const result = await client.getScanResultsByScanIds(['scan1']);
@@ -264,7 +282,7 @@ describe('PanAirsTsClient', () => {
                 return Promise.reject(interceptorErrorFn(mockError));
             });
 
-            await expect(client.getScanResultsByScanIds(['unknown'])).rejects.toThrowError(
+            await expect(client.getScanResultsByScanIds(['unknown'])).rejects.toThrow(
                 PanAirsApiError
             );
             expect(mockAxiosInstance.get).toHaveBeenCalledWith('/v1/scan/results', {
@@ -278,14 +296,14 @@ describe('PanAirsTsClient', () => {
      * ------------------------------------------------------------------ */
     describe('getThreatScanReports', () => {
         it('should throw error if no reportIds are provided', async () => {
-            await expect(client.getThreatScanReports([])).rejects.toThrowError(
+            await expect(client.getThreatScanReports([])).rejects.toThrow(
                 'At least 1 report_id is required'
             );
         });
 
         it('should throw error if more than 5 reportIds are provided', async () => {
             const tooManyIds = ['r1', 'r2', 'r3', 'r4', 'r5', 'r6'];
-            await expect(client.getThreatScanReports(tooManyIds)).rejects.toThrowError(
+            await expect(client.getThreatScanReports(tooManyIds)).rejects.toThrow(
                 'Max of 5 report_ids can be requested at a time'
             );
         });
@@ -306,8 +324,16 @@ describe('PanAirsTsClient', () => {
                 },
             ];
 
+            const mockResponse: AxiosResponse = {
+                data: mockData,
+                status: 200,
+                statusText: 'OK',
+                headers: {},
+                config: {} as InternalAxiosRequestConfig
+            };
+
             mockAxiosInstance.get.mockImplementationOnce(async () => {
-                return interceptorSuccessFn({ data: mockData });
+                return interceptorSuccessFn(mockResponse);
             });
 
             const result = await client.getThreatScanReports(['rep123']);
@@ -332,9 +358,7 @@ describe('PanAirsTsClient', () => {
                 return Promise.reject(interceptorErrorFn(mockError));
             });
 
-            await expect(client.getThreatScanReports(['spam-id'])).rejects.toThrowError(
-                PanAirsApiError
-            );
+            await expect(client.getThreatScanReports(['spam-id'])).rejects.toThrow(PanAirsApiError);
             expect(mockAxiosInstance.get).toHaveBeenCalledWith('/v1/scan/reports', {
                 params: { report_ids: 'spam-id' },
             });

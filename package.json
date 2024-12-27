@@ -19,7 +19,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint . ",
     "test": "jest --coverage",
     "prepare": "npm run build",
     "prepublishOnly": "npm run lint && npm run test"

@@ -131,7 +131,8 @@ export interface DSDetailResultObject {
 /**
  * URL Filtering entries
  */
-export interface UrlFilterReportObject extends Array<UrlfEntryObject> {}
+export type UrlFilterReportObject = UrlfEntryObject[];
+
 
 export interface UrlfEntryObject {
     url?: string;
@@ -159,7 +160,7 @@ export interface PanAirsApiErrorResponse {
     message?: string;
     error?: {
         message?: string;
-        [key: string]: any;
+        [key: string]: string | number | boolean | null | undefined;
     };
     retry_after?: {
         interval?: number;
