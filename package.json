@@ -1,14 +1,38 @@
 {
-  "name": "${PROJECT_NAME}",
-  "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
-  "scripts": {
-    "build": "tsc"
+  "name": "pan-airs-ts",
+  "version": "0.1.0",
+  "description": "TypeScript library for Palo Alto Networks AI Runtime Security",
+  "author": "Calvin Remsburg <cremsburg.dev@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cdot65/pan-airs-ts.git"
   },
-  "dependencies": {},
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [
+    "ai runtime security",
+    "palo alto networks",
+    "TypeScript",
+    "Security"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "lint": "eslint . --ext .ts",
+    "test": "jest --coverage",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run lint && npm run test"
+  },
   "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@typescript-eslint/eslint-plugin": "^5.5.3",
+    "@typescript-eslint/parser": "^5.5.3",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
     "typescript": "^5.5.3"
   },
-  "private": true
+  "dependencies": {
+  }
 }
