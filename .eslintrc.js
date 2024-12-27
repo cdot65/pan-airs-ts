@@ -14,6 +14,11 @@ module.exports = {
         'plugin:@typescript-eslint/recommended'
     ],
     rules: {
-        // e.g., "@typescript-eslint/no-explicit-any": "off",
+        '@typescript-eslint/no-unused-vars': ['error', {
+            argsIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
+            // This is important to ignore exported symbols from reporting as unused
+            ignoreRestSiblings: true,
+        }],
     }
 };

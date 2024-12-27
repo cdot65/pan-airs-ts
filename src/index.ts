@@ -1,5 +1,5 @@
 // src/index.ts
 
-export function exampleFunction(name: string): string {
-    return `Hello ${name}`;
-}
+export * from './client';
+export * from './errors';
+export * from './types';
