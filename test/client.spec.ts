@@ -105,6 +105,29 @@ describe('PanAirsTsClient', () => {
             expect(result).toEqual(mockScanResponse);
         });
 
+        it('should throw PanAirsApiError for network errors', async () => {
+            // Create an AxiosError without a response (network error)
+            const mockError = new Error('Network Error') as AxiosError<PanAirsApiErrorResponse>;
+            mockError.isAxiosError = true;
+            // Explicitly set response to undefined to simulate network error
+            mockError.response = undefined;
+
+            mockAxiosInstance.post.mockImplementationOnce(async () => {
+                return Promise.reject(interceptorErrorFn(mockError));
+            });
+
+            const requestBody: ScanRequest = {
+                ai_profile: { profile_name: 'test-profile' },
+                contents: [{ prompt: 'test prompt' }],
+            };
+
+            await expect(client.scanSyncRequest(requestBody)).rejects.toThrow('Unknown error while calling AIRS');
+            expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+                '/v1/scan/sync/request',
+                requestBody
+            );
+        });
+
         it('should throw PanAirsApiError on error response', async () => {
             // 1) Create a real Error object (cast to AxiosError)
             const mockError = new Error('Bad Request') as AxiosError<PanAirsApiErrorResponse>;
